@@ -75,3 +75,77 @@ test.describe('Level 1 - GET requests booking', () => {
 })
 
 
+test.describe('Level 2 & 3 - POST, Auth, Update and Delete', () => { 
+    // POST & Auth
+    let bookingId:number
+    test('create a new booking', async({request}) => { 
+        const response = await request.post('https://restful-booker.herokuapp.com/booking', {
+            headers: { 
+                'Content-Type': 'application/json'
+            }, 
+
+            data: { 
+                "firstname" : "Huy",
+                "lastname" : "Tran",
+                "totalprice" : 140,
+                "depositpaid" : false,
+                "bookingdates" : {
+                    "checkin" : "2025-01-01",
+                    "checkout" : "2025-02-01"
+                },
+                "additionalneeds" : "Dinner"
+            }
+        })
+        expect(response.ok()).toBeTruthy()
+        expect(response.status()).toBe(200)
+
+        const responseBody = await response.json()
+        console.log(responseBody);
+
+        expect(Object.keys(responseBody)).toBeTruthy()
+        expect(Object.values(responseBody)).toBeTruthy()
+        expect(Object.keys(responseBody).length).toBeGreaterThan(0)
+        expect(responseBody.booking).toMatchObject({
+            firstname: "Huy",
+            lastname: "Tran",
+            totalprice: 140,
+            depositpaid: false,
+            bookingdates: {
+                checkin: "2025-01-01",
+                checkout: "2025-02-01"
+            }, 
+            additionalneeds : "Dinner"
+        });
+
+        bookingId = responseBody.bookingid
+        console.log('>>> bookingID POST request', bookingId)
+        
+    })
+
+    test('create an auth token', async({request}) => { 
+        let token:string
+        const responseAuth = await request.post('https://restful-booker.herokuapp.com/auth', { 
+            headers: { 
+                'Content-Type': 'application/json' 
+            }, 
+
+            data: { 
+                "username" : "admin",
+                "password" : "password123"
+            }
+        })
+
+        expect(responseAuth.ok()).toBeTruthy()
+        expect(responseAuth.status()).toBe(200) 
+
+        const responseAuthBody = await responseAuth.json() 
+        console.log('>>> responseAuth: ', responseAuthBody)
+        expect(Object.keys(responseAuthBody)).toBeTruthy()
+        expect(Object.keys(responseAuthBody).length).toBeTruthy() 
+
+        // save token
+        token = responseAuthBody
+    })
+
+    
+})
